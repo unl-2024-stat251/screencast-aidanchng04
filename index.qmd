@@ -1,5 +1,5 @@
 ---
-author: "Your Name"
+author: "Khai Shen Chng"
 date: "2023-05-04"
 title: "Project: Screencast"
 output: html

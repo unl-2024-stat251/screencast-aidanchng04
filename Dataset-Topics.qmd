@@ -1,23 +1,26 @@
 ---
-author: "Your Name"
+author: "Khai Shen Chng"
 date: "2023-04-18"
 title: "Project Dataset and Topics"
 output: html
 categories: project
 ---
 
-[Link to dataset]()
+```{r}
+team_results <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-03-26/team-results.csv')
+public_picks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-03-26/public-picks.csv')
+```
 
 Things you plan to investigate using this dataset:
 
-- Thing 1
-- Thing 2
-- Thing 3
+- Which factors have higher influence on the public to pick a specific team to have a deeper championship run
+- Which 3 teams would I personally have winning the championship based on team_results
 
 Stat 251 topics you plan to cover during the analysis:
 
-1. Topic 1
-2. Topic 2
-3. Topic 3
-4. Topic 4
+1. Data Cleaning
+2. Joining Tables
+3. Groupby and Summary
+4. Plotting Graphs
+
 
