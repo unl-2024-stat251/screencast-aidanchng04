@@ -1,8 +1,73 @@
 ---
-author: "Your Name"
+author: "Khai Shen Chng"
 date: "2023-04-20"
 title: "Screencast Pseudocode"
 output: html
 categories: project
 ---
+
+Initial Steps to get started:
+
+Explain some of the skills we will be using for this screencast:
+1) Joining Tables
+2) Data Cleaning (mainly)
+3) Data visualizing
+
+Won't be using:
+1) Reshaping Data (no key variables)
+2) Lubricate (No dates and times to alter)
+3) Stringr (No strings to work with as all data are in integers and percentages)
+4) functions???
+
+
+
+Step 1: Join Table
+  public_picks left.join team_results to acquire a 64xN table
+
+Step 2: Data Cleaning
+  Remove any duplicate columns like Team names
+  
+Step 3: Data Cleaning
+  Rename variables that are similar. for example R64, R32, S16, E8, F4 etc
+  
+  
+  
+
+Task 1: Which factors have higher influence on the public to pick a specific team to have a deeper championship run
+
+Step 1: Data Cleaning
+  Create 5 different tables which are sorted descending based on public picks for each round and sense a pattern there
+  
+Step 2: nlme
+  Create Linear Regression models for necessary variables using lm
+  
+Step 3: nlme
+  Use forward selection to see assess which variables are most relevant to the public's pick
+  
+Step 4: Visualizing Data
+  Use ggplot to visualize multiple linear regression for results
+  
+  
+  
+
+
+
+Task 2: Which 3 teams would I personally have winning the championship based on team_results
+
+Step 1:
+
+Step 2:
+
+Step 3:
+
+
+
+
+
+
+
+
+
+
+
 
