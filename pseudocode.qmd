@@ -12,53 +12,153 @@ Explain some of the skills we will be using for this screencast:
 1) Joining Tables
 2) Data Cleaning (mainly)
 3) Data visualizing
+4) Stringr 
+5) Functions
 
 Won't be using:
 1) Reshaping Data (no key variables)
 2) Lubricate (No dates and times to alter)
-3) Stringr (No strings to work with as all data are in integers and percentages)
-4) functions???
 
+```{r}
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(purrr)
+library(nlme)
 
+```
 
 Step 1: Join Table
-  public_picks left.join team_results to acquire a 64xN table
+  * 64 teams in public_picks; way more in team_results
+  public_picks left.join team_results to acquire a 64xN table (match with team_name as teamID are different)
+```{r}
+df1 = public_picks
+df2 = team_results
+result <- left_join(df1, df2, by = "key")
+
+```
+
 
 Step 2: Data Cleaning
-  Remove any duplicate columns like Team names
+  Remove any useless variables like TeamID and year
+```{r}
+
+```
+  
   
 Step 3: Data Cleaning
-  Rename variables that are similar. for example R64, R32, S16, E8, F4 etc
+  Rename variables that are similar. for example R64, R32, S16, E8, F4 etc are named the same
+  * R64 from public_picks becomes R64_pick
+```{r}
+
+```
+  
+  
+Step 4: Working with Strings
+  * Analyse the datatypes of the variables
+  * Test the ascending and descending from the table; not accurate because the percentages (Characters) are strings 
+  * Doubles work fine so don't need to change
+  Convert characteres into integers for easier comparisons
+```{r}
+
+```
+  
+  
+Now that data is cleaned and altered correctly, we can now conduct some analysis
   
   
   
 
 Task 1: Which factors have higher influence on the public to pick a specific team to have a deeper championship run
 
-Step 1: Data Cleaning
+Step 1: Data Cleaning (Arranging)
   Create 5 different tables which are sorted descending based on public picks for each round and sense a pattern there
-  
+  Some variabels worth looking are F4percent, champpercent, winpercent, pase
+  * Use head() to analyse the first 5 only
+```{r}
+
+```
+  * Make a note of the pattern. Are all the public picks for each round the same? If so, we only need to analyse one table
+
 Step 2: nlme
   Create Linear Regression models for necessary variables using lm
   
-Step 3: nlme
-  Use forward selection to see assess which variables are most relevant to the public's pick
+  Prediction: Once a model is established, it can be used to predict the response variable for new observations. For example, given the win   percentage of teams not yet observed in the dataset, the model can predict how many people might pick these teams to win a championship
   
+  Inference: Linear regression allows analysts to understand which factors are significant predictors of the outcome and how changes in      these predictors affect the response variable. It provides insights into the strength and direction (positive or negative) of these        relationships.
+```{r}
+# Load the necessary libraries
+library(tidyverse)
+
+# Example data frame with 8 variables
+df <- tibble(
+  target = rnorm(100),
+  var1 = rnorm(100),
+  var2 = rnorm(100),
+  var3 = rnorm(100),
+  var4 = rnorm(100),
+  var5 = rnorm(100),
+  var6 = rnorm(100),  # Assume we are not using var6, var7, and var8
+  var7 = rnorm(100),
+  var8 = rnorm(100)
+)
+
+# Running regressions
+models <- map(variables_to_regress, ~lm(reformulate("target", response = .), data = df))
+
+# Specify the variables for the regression
+variables_to_regress <- c("var1", "var2", "var3", "var4", "var5")
+
+# Extracting p-values and multiple R-squared values
+results <- map(models, ~list(
+  p_values = summary(.)$coefficients[,4],  # Extract p-values from the coefficients table
+  r_squared = summary(.)$r.squared         # Extract the multiple R-squared value
+))
+
+# View results
+results
+```
+  
+P-value is how statistically significant the predictor variable is to the response variable. Ideally, if it is below 0.05, it will give us a reliable estimate for number of picks
+
+R square helps us justify that predictor variable can justify ___% of the variance in number of picks for a team to win it all
+  
+
 Step 4: Visualizing Data
-  Use ggplot to visualize multiple linear regression for results
+  Use ggplot to visualize linear regression models for results
   
+```{r}
+# Plot each variable with the regression line
+map(variables, ~ggplot(df, aes_string(x = .x, y = "target")) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  labs(title = paste("Regression of target on", .x)))
+```
+
+When analyzing the plots, consider the following aspects:
+
+Linearity: The relationship between the predictor and the target should appear linear if a linear regression model is appropriate. Non-linear patterns (such as curves or bends) might suggest the need for transformations (e.g., logarithmic, square root) or a different type of model (e.g., polynomial regression).
+
+Homoscedasticity: The spread of the residuals should be consistent across all values of the predictor. If the spread varies (e.g., a funnel shape where variance increases with the value of the predictor), this suggests heteroscedasticity, which violates one of the assumptions of linear regression.
+
+Outliers: Look for points that deviate significantly from the trend line. These may represent outliers or influential points that could unduly affect the regression model.
+
+Leverage and Influence: While harder to see directly from a simple scatter plot, be mindful of points that lie far away from the cluster of other data points horizontally. These can disproportionately influence the slope of the regression line.
   
-  
+
+** Mention for future statistical testing, we could 
+1) create a residual plot 
+2) transform some of the data like logging, squaring, etc. 
+3) Conduct multiple linear regression for a more accurate predictive model
+
+but our main focus now is on data wrangling
+
+
+Task 2: Is there a pattern between increasing number of loses and number of championships?
 
 
 
-Task 2: Which 3 teams would I personally have winning the championship based on team_results
-
-Step 1:
-
-Step 2:
-
-Step 3:
+Step 1: Analysing results from graphs and speak on them
 
 
 
