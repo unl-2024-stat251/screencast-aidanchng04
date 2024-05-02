@@ -17,19 +17,16 @@ team_results <- readr::read_csv('https://raw.githubusercontent.com/rfordatascien
 public_picks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-03-26/public-picks.csv')
 ```
 
-
 Join the tables
 ```{r}
 joint_df <- left_join(public_picks, team_results, by = "TEAM")
 ```
-
 
 Removing any unnecessary variables/columns
 ```{r}
 joint_df <- joint_df %>%
   select(-TEAMID, -YEAR)
 ```
-
 
 Converting String percentages to integers
 ```{r}
@@ -41,16 +38,15 @@ joint_df1 <- joint_df %>%
 ```
 
 
-
-
 Task 1: Which factors have higher influence on the public to pick a specific team to have a deeper championship run
+
 ```{r}
 descend_df <- joint_df1 %>%
   arrange(desc(FINALS))
 head(descend_df)
 ```
-** The percentage of people picking a specific team to advance each round follows a similar pattern for all rounds
 
+** The percentage of people picking a specific team to advance each round follows a similar pattern for all rounds
 
 ```{r}
 population <- 22000000
@@ -58,42 +54,42 @@ population <- 22000000
 descend_df$FINALS_pop <- descend_df$FINALS / 100 * population
 ```
 
+Linear Regression Model
 
-Creating Linear Regression Model
 ```{r}
 variables_regress <- c("PAKE", "PASE", "GAMES", "W", "WINPERCENT", "F2", "CHAMP", "TOP2")
 
 models <- map(variables_regress, ~lm(reformulate("FINALS_pop", response = .), data = descend_df))
 
+
 results_df <- map_df(models, ~{
   tibble(
     p_value_response_var = summary(.)$coefficients[2, "Pr(>|t|)"],
     r_squared = summary(.)$r.squared
-  )}, 
-  .id = "model_id")
+  )
+}, .id = "model_id")
 
 results_df$variable <- variables_regress
 
 results_df <- results_df %>%
-  arrange(desc(p_value_response_var)) %>%
+  arrange((p_value_response_var)) %>%
   mutate(r_squared = r_squared *100)
 
 results_df
 ```
 
 
-Visualizing Linear Regression Graphs
+Visualizing Data
 ```{r}
 map(variables_regress, ~ggplot(descend_df, aes_string(x = .x, y = "FINALS_pop")) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
   labs(title = paste("Regression of target on", .x)))
+
 ```
 
-
-
-
 Task 2: Is there a pattern between increasing number of loses and number of championships?
+
 ```{r}
 # Assuming 'data' is your dataframe and 'column1' and 'column2' are the column names
 loses_champ <- descend_df[c("TEAM", "L", "CHAMP")]
