@@ -37,3 +37,157 @@ Converting String to Number
 joint_df <- joint_df %>%
   mutate(FINALS = as.numeric(str_replace(FINALS, "%", "")))
 ```
+
+
+
+Converting String percentages to integers
+```{r}
+percent_var <- c('R64.x', 'R32.x', 'S16.x', 'E8.x', 'F4.x', 'FINALS', 'F4PERCENT', 'CHAMPPERCENT')
+
+joint_df1 <- joint_df %>%
+  mutate(across(.cols = percent_var,
+                .fns = ~as.numeric(str_replace(.x, "%", ""))))
+```
+
+
+Manually adding data
+```{r}
+team_results2 <- team_results
+public_picks$conference = c("MAC", "SEC", "PAC12", "SEC", "BIG12", "BYU", "ACC", "Patriot", 
+                            "CAA", "PAC12", "Mountain West", "Big East", "Big East", 
+                            "A10", "MVC", "ACC", "A10", "SEC", "American", "WCC", "SWAC", 
+                            "WAC", "BIG12", "BIG10", "BIG12", "Sun Belt", "BIG12", "SEC", "Big West",
+                            "Big South", "Big East", "SLC", "BIG10", "SEC", "OVC", "BIG10",
+                            "Mountain West", "Mountain West", "ACC", "ACC", "BIG10",
+                            "Horizon", "BIG12", "BIG10", "WCC", "MAAC", "SOCON", "Mountain West",
+                            "SEC", "Summit", "ASUN", "BIG12", "SEC", "BIG12", "SEC", 
+                            "BIG12", "AAC", "Mountain West",
+                            "AEC", "NEC", "PAC12", "Conference USA", "BIG10", "Ivy League")
+
+public_picks$mascotType = c("Animal", "Animal", "Animal", "Animal", "Animal", "Animal", "Animal",
+                            "Human", "Animal", "Animal", "Animal", "Animal", "Animal", "Human", 
+                            "Animal", "Misc", "Human", "Animal", "Animal", "Animal", "Animal",
+                            "Animal", "Animal", "Human", "Animal", "Human", "Animal", "Animal", 
+                            "Animal", "Animal", "Animal", "Human", "Human", "Animal", "Animal", 
+                            "Human", "Animal", "Animal", "Animal", "Animal", "Animal", "Animal", 
+                            "Animal", "Human", "Human", "Animal", "Animal", "Human", "Animal", 
+                            "Animal", "Human", "Animal", "Animal", "Animal", "Animal", "Human",
+                            "Animal", "Animal", "Animal", "Animal", "Animal", "Misc", "Animal", 
+                            "Animal")
+
+
+
+
+
+picks_sub <- data.frame(joint_df$TEAM, joint_df$R64.x, joint_df$TOP2, joint_df$W, joint_df$F4.y,
+                        joint_df$conference, joint_df$mascotType)
+
+picks_sub$mascot <- c("cute", "cute", "scary", "cute",
+"ugly", "sexy", "ugly", "scary",
+"cute", "cute", "ugly", "ugly", 
+"cute", "scary", "ugly", "scary", 
+"scary", "ugly", "cute", "ugly", 
+"ugly", "ugly", "cute", "scary",
+"scary", "cute", "cute", "ugly", 
+"scary", "sexy", "ugly", "ugly",
+"sexy", "ugly", "scary", "sexy",
+"cute", "scary", "cute", "scary",
+"cute", "scary", "cute", "scary",
+"sexy", "cute", "ugly", "sexy",
+"cute", "sexy", "scary", "cute",
+"ugly", "ugly", "cute", "scary",
+"cute", "sexy", "scary", "ugly",
+"scary", "cute", "ugly", "ugly")
+
+picks_sub$mascot <- as.factor(picks_sub$mascot)
+
+```
+
+Convert String to Number
+```{r}
+
+picks_sub <- picks_sub %>%
+  mutate(joint_df.R64.x = as.numeric(str_replace(joint_df.R64.x, "%", "")) * 22000000)
+
+picks_sub$joint_df.conference = as.factor(picks_sub$joint_df.conference)
+
+unique(picks_sub$joint_df.conference)
+
+lin.mod <- lm(picks_sub$joint_df.R64.x ~ picks_sub$joint_df.TOP2 + picks_sub$joint_df.W +
+              picks_sub$joint_df.F4.y + picks_sub$mascot)
+
+summary(lin.mod)
+
+
+
+```
+
+Task 1: Which factors have higher influence on the public to pick a specific team to have a deeper championship run
+
+```{r}
+descend_df <- joint_df1 %>%
+  arrange(desc(FINALS))
+head(descend_df)
+```
+
+** The percentage of people picking a specific team to advance each round follows a similar pattern for all rounds
+
+```{r}
+population <- 22000000
+
+descend_df$FINALS_pop <- descend_df$FINALS / 100 * population
+```
+
+Linear Regression Model
+
+```{r}
+variables_regress <- c("PAKE", "PASE", "GAMES", "W", "WINPERCENT", "F2", "CHAMP", "TOP2")
+
+models <- map(variables_regress, ~lm(reformulate("FINALS_pop", response = .), data = descend_df))
+
+
+results_df <- map_df(models, ~{
+  tibble(
+    p_value_response_var = summary(.)$coefficients[2, "Pr(>|t|)"],
+    r_squared = summary(.)$r.squared
+  )
+}, .id = "model_id")
+
+results_df$variable <- variables_regress
+
+results_df <- results_df %>%
+  arrange((p_value_response_var)) %>%
+  mutate(r_squared = r_squared *100)
+
+results_df
+```
+
+
+Visualizing Data
+```{r}
+map(variables_regress, ~ggplot(descend_df, aes_string(x = .x, y = "FINALS_pop")) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  labs(title = paste("Regression of target on", .x)))
+
+```
+
+Task 2: Is there a pattern between increasing number of loses and number of championships?
+
+```{r}
+# Assuming 'data' is your dataframe and 'column1' and 'column2' are the column names
+loses_champ <- descend_df[c("TEAM", "L", "CHAMP")]
+
+loses_champ <- loses_champ %>%
+  arrange(desc(L))
+
+head(loses_champ)
+```
+
+
+
+
+
+
+
+
