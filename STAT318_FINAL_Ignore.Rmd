@@ -1,0 +1,39 @@
+STAT318 Final Code
+
+```{r}
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(purrr)
+library(nlme)
+library(tidyverse)
+```
+
+Reading CSV files
+```{r}
+team_results <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-03-26/team-results.csv')
+
+public_picks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-03-26/public-picks.csv')
+```
+
+Join the tables
+```{r}
+joint_df <- left_join(public_picks, team_results, by = "TEAM")
+```
+
+Removing any unnecessary variables/columns
+```{r}
+joint_df <- joint_df %>%
+  select(FINALS, )
+```
+
+
+
+Converting String to Number
+
+```{r}
+
+
+joint_df <- joint_df %>%
+  mutate(FINALS = as.numeric(str_replace(FINALS, "%", "")))
+```
