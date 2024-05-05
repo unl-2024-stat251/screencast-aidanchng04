@@ -33,7 +33,43 @@ Converting String to Number
 
 ```{r}
 
+joint_df$TEAM
 
 joint_df <- joint_df %>%
-  mutate(FINALS = as.numeric(str_replace(FINALS, "%", "")))
+  mutate(FINALS = as.numeric(str_replace(FINALS, "%", "")) * 22000000)
+```
+
+
+
+```{r}
+[33] "Michigan St."          "Mississippi St."       "Morehead St."          "Nebraska"             
+[37] "Nevada"                "New Mexico"            "North Carolina"        "North Carolina St."   
+[41] "Northwestern"          "Oakland"               "Oregon"                "Purdue"               
+[45] "Saint Mary's"          "Saint Peter's"         "Samford"               "San Diego St."        
+
+human, animal, animal, human
+animals, animal, animal, animal,
+animals, animal, animal, human, 
+human, animal, animal, human
+
+cute, scary, ugly, sexy
+
+"cute", "cute", "scary", "cute",
+"ugly", "sexy", "ugly", "scary",
+"cute", "cute", "ugly", "ugly", 
+"cute", "scary", "ugly", "scary", 
+"scary", "ugly", "cute", "ugly", 
+"ugly", "ugly", "cute", "scary",
+"scary", "cute", "cute", "ugly", 
+"scary", "sexy", "ugly", "ugly",
+"sexy", "ugly", "scary", "sexy",
+"cute", "scary", "cute", "scary",
+"cute", "scary", "cute", "scary",
+"sexy", "cute", "ugly", "sexy",
+"cute", "sexy", "scary", "cute",
+"ugly", "ugly", "cute", "scary",
+"cute", "sexy", "scary", "ugly",
+"scary", "cute", "ugly", "ugly"
+
+
 ```
