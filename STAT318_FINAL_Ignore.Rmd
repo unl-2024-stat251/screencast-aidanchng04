@@ -16,60 +16,135 @@ team_results <- readr::read_csv('https://raw.githubusercontent.com/rfordatascien
 public_picks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-03-26/public-picks.csv')
 ```
 
+
+Adding Variables
+```{r}
+public_picks$region <- c("Midwest", "West", "West", "East",
+                         "West", "East", "West", "West",
+                         "West", "South", "Midwest", "East",
+                         "Midwest", "West", "East", "South",
+                         "East", "South", "East", "Midwest",
+                         "Midwest", "West", "South", "East",
+                         "East", "South", "Midwest", "South",
+                         "West", "South", "South", "Midwest",
+                         "West", "West", "East", "South",
+                         "West", "West", "West", "South",
+                         "East", "South", "Midwest", "Midwest",
+                         "West", "Midwest", "Midwest", "East",
+                         "Midwest", "East", "East", "Midwest",
+                         "Midwest", "South", "South", "South",
+                         "East", "Midwest", "South", "West",
+                         "East", "South", "South", "East")
+
+
+public_picks$mascot <- c("cute", "cute", "scary", "cute",
+                      "ugly", "sexy", "ugly", "scary",
+                      "cute", "cute", "ugly", "ugly", 
+                      "cute", "scary", "ugly", "scary", 
+                      "scary", "ugly", "cute", "ugly", 
+                      "ugly", "ugly", "cute", "scary",
+                      "scary", "cute", "cute", "ugly", 
+                      "scary", "sexy", "ugly", "ugly",
+                      "sexy", "ugly", "scary", "sexy",
+                      "cute", "scary", "cute", "scary",
+                      "cute", "scary", "cute", "scary",
+                      "sexy", "cute", "ugly", "sexy",
+                      "cute", "sexy", "scary", "cute",
+                      "ugly", "ugly", "cute", "scary",
+                      "cute", "sexy", "scary", "ugly",
+                      "scary", "cute", "ugly", "ugly")
+
+public_picks$seeding <- c(14, 4, 2, 4, 3, 6, 6,
+                       14, 13, 10, 10, 1, 3,
+                       7, 10,  4, 11, 7, 8, 
+                       5, 16, 12, 1, 3, 2, 12,
+                       4, 3, 15, 16, 2, 12, 
+                       9, 8, 14, 8, 10, 11,
+                       1, 11, 9, 14, 11, 1,
+                       5, 15, 13, 5, 6, 15,
+                       16, 9, 2, 7, 9, 6, 12, 
+                       8, 13, 16, 7, 15, 5,
+                       13)
+
+public_picks$mascot <- as.factor(public_picks$mascot)
+public_picks$region <- as.factor(public_picks$region)
+```
+
+
+
 Join the tables
 ```{r}
 joint_df <- left_join(public_picks, team_results, by = "TEAM")
 ```
 
-Removing any unnecessary variables/columns
+
+
+Converting String percentages to integers
 ```{r}
-joint_df <- joint_df %>%
-  select(FINALS, )
+percent_var <- c('R64.x', 'R32.x', 'S16.x', 'E8.x', 'F4.x', 'FINALS')
+
+joint_df1 <- joint_df %>%
+  mutate(across(.cols = percent_var,
+                .fns = ~(as.numeric(str_replace(.x, "%", "")) * 22000000)))
+
+joint_df1 <- joint_df1 %>%
+  mutate(across(.cols = c("F4PERCENT", "CHAMPPERCENT"),
+                .fns = ~(as.numeric(str_replace(.x, "%", "")))))
+
+joint_df1[is.na(joint_df1)] <- 0
 ```
 
 
 
-Converting String to Number
-
+Convert String to Number
 ```{r}
 
-joint_df$TEAM
+#First Model
+lin.mod1 <- lm(R64.x ~ seeding, data = joint_df1)
+summary(lin.mod1)
 
-joint_df <- joint_df %>%
-  mutate(FINALS = as.numeric(str_replace(FINALS, "%", "")) * 22000000)
+#First Model Graph
+plot(joint_df1$seeding, joint_df1$R64.x, main = "Regression Line", 
+     xlab = "Seeding", ylab = "Round of 64 Picks")
+abline(lin.mod1, col = "red")
+
+
+
+#Second Model 
+mul.mod1 <- lm(R64.x ~ TOP2 + F4.y + WINPERCENT + mascot, data = joint_df1)
+summary(mul.mod1)
+
+
+#Forward Selection 
+int.mod <- lm(FINALS ~ 1, data = joint_df1)
+
+full.mod <- lm(FINALS ~ PAKERANK + PASERANK + GAMES + WINPERCENT + CHAMP + TOP2 + F4PERCENT + CHAMPPERCENT + region, 
+               data = joint_df1)
+
+fwd.sel <- step(object = int.mod, scope = list(upper = full.mod),
+                direction = "forward", k = 2, tace = TRUE)
+
+
+#Third Model
+mul.mod3 <- lm(FINALS ~ CHAMP + TOP2 + F4PERCENT, data = joint_df1)
+summary(mul.mod3)
+
+
+#Fourth Model
+mul.mod4 <- lm(FINALS ~ CHAMP + TOP2 + F4PERCENT + region, data = joint_df1)
+summary(mul.mod4)
+
+#Fifth Model
+mul.mod5 <- lm(FINALS ~ CHAMP + TOP2 + F4PERCENT + mascot, data = joint_df1)
+summary(mul.mod5)
+
 ```
 
 
 
-```{r}
-[33] "Michigan St."          "Mississippi St."       "Morehead St."          "Nebraska"             
-[37] "Nevada"                "New Mexico"            "North Carolina"        "North Carolina St."   
-[41] "Northwestern"          "Oakland"               "Oregon"                "Purdue"               
-[45] "Saint Mary's"          "Saint Peter's"         "Samford"               "San Diego St."        
-
-human, animal, animal, human
-animals, animal, animal, animal,
-animals, animal, animal, human, 
-human, animal, animal, human
-
-cute, scary, ugly, sexy
-
-"cute", "cute", "scary", "cute",
-"ugly", "sexy", "ugly", "scary",
-"cute", "cute", "ugly", "ugly", 
-"cute", "scary", "ugly", "scary", 
-"scary", "ugly", "cute", "ugly", 
-"ugly", "ugly", "cute", "scary",
-"scary", "cute", "cute", "ugly", 
-"scary", "sexy", "ugly", "ugly",
-"sexy", "ugly", "scary", "sexy",
-"cute", "scary", "cute", "scary",
-"cute", "scary", "cute", "scary",
-"sexy", "cute", "ugly", "sexy",
-"cute", "sexy", "scary", "cute",
-"ugly", "ugly", "cute", "scary",
-"cute", "sexy", "scary", "ugly",
-"scary", "cute", "ugly", "ugly"
 
 
-```
+
+
+
+
